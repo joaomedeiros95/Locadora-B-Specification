@@ -1,0 +1,72 @@
+/* Set_I
+ * Author: João Eduardo Medeiros
+ * Creation date: 10/06/16
+ */
+ 
+IMPLEMENTATION Set_I 
+REFINES Set
+SEES Pessoas, Carros
+CONCRETE_VARIABLES fimpeople, arraypeople, fimcar, arraycar
+INVARIANT fimpeople : NAT & fimpeople <= 10 & arraypeople : 0..10 --> PEOPLE & !xx .(xx : NAT & xx <= fimpeople => arraypeople(xx) : peopleset)
+& fimcar : NAT & fimcar <= 10 & arraycar : 0..10 --> CARS & !xx .(xx : NAT & xx <= fimcar => arraycar(xx) : carset)
+INITIALISATION fimpeople := 0 ; fimcar := 0 ; arraycar := (0..10) * {0} ; arraypeople := (0..10) * {0}
+OPERATIONS
+    add_people ( ee ) =
+        BEGIN IF fimpeople < 10 THEN arraypeople(fimpeople) := ee ; fimpeople := fimpeople + 1 ELSE skip END
+        END ;
+
+
+    oo <-- OUT_people =
+        BEGIN IF fimpeople > 0 THEN arraypeople(fimpeople) := 0; fimpeople := fimpeople - 1 ; oo := arraypeople(fimpeople) END
+        END;
+
+    add_car ( ee ) =
+        BEGIN IF fimcar < 10 THEN arraycar(fimcar) := ee ; fimcar := fimcar + 1 ELSE skip END
+        END ;
+       
+    remove_car(cc) =
+        BEGIN
+        /*buscar o carro*/
+        VAR ii, tmp, tmp2, sair IN 
+            ii := 0 ;   
+            tmp := 0;
+            tmp2 := 100;
+            sair := 0;
+            WHILE ii <= fimcar & sair = 0 DO
+                tmp := arraycar(ii);
+                IF tmp = cc THEN tmp2 := ii; sair := 1 END;
+                ii := ii + 1
+            INVARIANT ii : NAT & tmp : CARS & tmp2 : INT
+            VARIANT fimcar - ii
+            END;
+            /*se encontrou*/
+            IF tmp2 < 100  THEN
+                /*atual igual ao proximo*/
+                ii := tmp2;
+                WHILE ii < fimcar DO
+                    arraycar(ii) := arraycar(ii+1);
+                    ii := ii + 1           
+                INVARIANT ii : NAT & tmp : CARS & tmp2 : INT
+                VARIANT fimcar - ii
+                END;
+                /*zerar ultimo elemento*/
+                arraycar(fimcar) := 0;
+                /*decrementar fimcar*/                
+                fimcar := fimcar -1                
+                END
+            END
+        END;
+
+    oo <-- OUT_car =
+        BEGIN IF fimcar > 0 THEN arraycar(fimcar) := 0; fimcar := fimcar - 1 ; oo := arraycar(fimcar) END
+        END;
+
+    qq <-- cardCarros = 
+        BEGIN qq := fimcar
+        END;
+
+    qq <-- cardPessoas = 
+        BEGIN qq := fimpeople
+        END
+
+ END

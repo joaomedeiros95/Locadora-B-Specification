@@ -1,0 +1,123 @@
+/* GerenciarVeiculos_i
+ * Author: João Eduardo Medeiros
+ * Creation date: 11/06/16
+ */
+
+IMPLEMENTATION GerenciarVeiculos_i
+REFINES GerenciarVeiculos
+IMPORTS Set, GerenciarReservas
+PROMOTES removerReserva, adicionarReserva, cardReservas
+SEES 
+    Pessoas, Carros, Modelos
+CONCRETE_VARIABLES alugueis_i, tipocarro_i
+INVARIANT carset = carros & alugueis_i : PEOPLE --> CARS & !xx . (xx : NAT & xx <= 10 & alugueis_i(xx) /= 0 => alugueis_i(xx) = alugueis(xx))
+& tipocarro_i : CARS --> MODELO & !xx . (xx : NAT & xx <= 10 => tipocarro_i(xx) = tipocarro(xx))
+INITIALISATION alugueis_i := PEOPLE * {0} ; 
+    VAR ii, tmp IN
+        ii := 10 ;
+        WHILE ii > 0 DO
+            tmp := ii mod 3 ;
+            IF tmp = 0 THEN tipocarro_i(ii) := 1 
+            ELSIF tmp = 1 THEN tipocarro_i(ii) := 2
+            ELSE tipocarro_i(ii) := 3 END;
+            ii := ii - 1
+        INVARIANT ii : NAT & !xx . (xx : NAT & xx > ii & xx <= 10 => (tipocarro_i(xx) = 1 or tipocarro_i(xx) = 2 or tipocarro_i(xx) = 3))
+        VARIANT ii
+        END
+    END
+OPERATIONS
+    /*Verificar o invariant do WHILE, corrigir lógica*/
+    cc <-- retirarCarro(mm,pp) = 
+        BEGIN
+            VAR ii, tmp, situacao IN
+                ii := 10 ;
+                WHILE ii > 0 DO
+                    tmp := tipocarro_i(ii);
+                    
+                    /*Receber a situação do carro ii */
+                    VAR aa, tmp2, tmp3, sair, sReserva IN 
+                        aa := 10 ;
+                        sair := 0 ;
+                        tmp2 := 0;
+                        WHILE aa >= 0 & sair = 0 DO
+                            tmp3 := alugueis_i(aa) ;
+                            IF tmp3 = ii THEN tmp2 := 1; sair := 1 END;
+                            aa := aa - 1
+                        INVARIANT aa : NAT & tmp2 : INT & tmp3 : CARS & !xx . (xx : NAT & xx > aa & xx <= 10 => (alugueis_i(aa) = 0 or alugueis_i(aa) = 1))
+                        VARIANT aa
+                        END;
+                        
+                        sReserva <-- situacaoReserva(ii);
+                        IF tmp2 /= 0 THEN situacao := 1 
+                        ELSIF sReserva = 1 THEN situacao := 2
+                        ELSE situacao := 3 END
+                      END;                                                
+                      
+                    IF tmp = mm & situacao = 3 THEN alugueis_i(pp) := ii ; cc := ii END;
+                    ii := ii - 1
+                INVARIANT ii : CARS & tmp : MODELO & situacao : INT
+                VARIANT ii
+                END
+            END
+        END;
+
+    qq <-- retirarCarroReservado(cc,pp) = 
+        BEGIN alugueis_i(pp) := cc ; qq := cc ; removerReserva(pp)
+        END;
+
+
+    qq <-- situacaoCarro(cc) = 
+        BEGIN VAR ii, tmp, tmp2, sair, sReserva IN 
+                ii := 10 ;
+                sair := 0 ;
+                tmp := 0;
+                WHILE ii >= 0 & sair = 0 DO
+                    tmp2 := alugueis_i(ii) ;
+                    IF tmp2 = cc THEN tmp := 1; sair := 1 END;
+                    ii := ii - 1
+                INVARIANT ii : NAT & tmp : INT & tmp2 : CARS & !xx . (xx : NAT & xx > ii & xx <= 10 => (alugueis_i(ii) = 0 or alugueis_i(ii) = 1))
+                VARIANT ii
+                END;
+                
+                sReserva <-- situacaoReserva(cc);
+                IF tmp /= 0 THEN qq := 1 
+                ELSIF sReserva = 1 THEN qq := 2
+                ELSE qq := 3 END
+              END
+        END;
+
+    
+    deixarCarro(pp) =
+        BEGIN alugueis_i(pp) := 0
+        END;
+
+    
+    adicionarCarro(cc, tt) =
+        BEGIN add_car(cc) ; tipocarro_i(cc) := tt
+        END;
+
+    removerCarro(cc) = 
+        BEGIN tipocarro_i(cc) := 0;
+              remove_car(cc)
+        END;
+
+    qq <-- tamanhoCarros = 
+       BEGIN qq <-- cardCarros
+       END;
+
+    qq <-- cardAlugueis = 
+       BEGIN 
+            VAR ii, tmp IN
+                ii := 10 ;
+                qq := 0;
+                WHILE ii >= 0  DO
+                    tmp := alugueis_i(ii) ;
+                    IF tmp > 0 THEN qq := qq + 1 END;
+                    ii := ii - 1
+                INVARIANT ii : NAT & tmp : CARS & qq >= 0
+                VARIANT ii
+                END
+            END
+        END
+
+ END

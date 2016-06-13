@@ -1,0 +1,70 @@
+/* Locadora_i
+ * Author: João Eduardo Medeiros
+ * Creation date: 12/06/16
+ */
+
+IMPLEMENTATION Locadora_i
+REFINES Locadora
+IMPORTS GerenciarPessoas, GerenciarVeiculos, GerenciarPagamento
+PROMOTES cadastrarPessoa, adicionarCarro, removerReserva, verSituacao, retirarCarroReservado
+SEES Pessoas, Carros, Modelos
+CONCRETE_VARIABLES precoModelo_i
+INVARIANT precoModelo_i : MODELO --> NAT1 & precoModelo_i = precoModelo
+INITIALISATION 
+    VAR ii IN
+        ii := 3 ;
+        WHILE ii > 0  DO
+            IF ii = 3 THEN precoModelo_i(1) := 5 
+            ELSIF ii = 2 THEN precoModelo_i(2) := 7
+            ELSE precoModelo_i(3) := 10
+            END;
+            ii := ii - 1
+        INVARIANT ii : NAT
+        VARIANT ii
+        END
+    END
+OPERATIONS
+    c1 <-- alugarCarro(mm, pp, dd) =     
+        BEGIN c1 <-- retirarCarro(mm,pp) ; gerarConta((precoModelo_i(mm)),pp,dd) ; alterarSituacao(pp, alugando)
+        END;
+
+
+    deletarCarro(cc) = 
+        BEGIN removerCarro(cc)
+        END;
+
+
+    devolverCarro(pp) = 
+        BEGIN deixarCarro(pp) ; alterarSituacao(pp, inadimplente) 
+        END;
+
+
+    pagarDevido(pp, vv) = 
+        BEGIN 
+            VAR situacao, tmp IN 
+            situacao <-- verSituacao(pp); 
+            pagarConta(pp,vv) ;
+            tmp := faltapagar(pp);
+            IF tmp = 0 & situacao /= alugando THEN alterarSituacao(pp, normal) END
+            END
+        END;
+
+
+    reservarVeiculo(pp, cc) = 
+        BEGIN adicionarReserva(pp, cc)
+        END;
+
+    pp <-- carrosLivres = 
+        BEGIN
+            VAR tc, ta, tr IN
+            tc <-- tamanhoCarros;
+            ta <-- cardAlugueis;
+            tr <-- cardReservas;
+            pp := tc - ta - tr
+            END
+         END;
+
+    pp <-- carrosAlugados = pp <-- cardAlugueis;
+
+    pp <-- carrosReservados = pp <-- cardReservas
+ END

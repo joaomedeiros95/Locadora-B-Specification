@@ -1,0 +1,30 @@
+/* GerenciarPagamento_i
+ * Author: 
+ * Creation date: 11/06/16
+ */
+
+IMPLEMENTATION GerenciarPagamento_i
+REFINES GerenciarPagamento
+SEES              Pessoas
+INITIALISATION    faltapagar := PEOPLE * {0} ; situacaopag :=  PEOPLE * {pagoutudo}
+VALUES precoDiaBase = 10
+OPERATIONS 
+    
+    /*mm preço pelo modelo, pp pessoa, dd quant dias, qq quant quilometragem*/
+    gerarConta(pm, pp, dd)=
+        BEGIN faltapagar(pp) := faltapagar(pp) + (precoDiaBase * dd * pm)
+             ; situacaopag(pp) := naopagou
+        END;
+        
+    pagarConta(pp, vv)=
+        BEGIN faltapagar(pp) := (faltapagar(pp) - vv) ;
+            VAR xx IN xx := faltapagar(pp) ;IF xx = 0 THEN situacaopag(pp) := pagoutudo
+            ELSE situacaopag(pp) := pagoumetade
+            END END
+        END;
+    
+    ss <-- verSituacaoPessoa(pp)=
+        BEGIN ss := situacaopag(pp)
+        END
+
+END

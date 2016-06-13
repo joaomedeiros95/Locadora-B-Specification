@@ -1,0 +1,31 @@
+/* GerenciarPessoasI
+ * Author: Stefano Loss
+ * Creation date: 08/06/2016
+ */
+
+IMPLEMENTATION GerenciarPessoasI
+REFINES GerenciarPessoas
+SEES Pessoas
+IMPORTS Set
+CONCRETE_VARIABLES situacaoI
+INVARIANT
+    peopleset = pessoas & situacaoI : PEOPLE --> SITUACAO & situacaoI = situacao
+INITIALISATION
+    situacaoI := PEOPLE * { normal }
+
+OPERATIONS
+    cadastrarPessoa ( pp ) = 
+        BEGIN add_people ( pp ) ;
+              situacaoI ( pp ) := normal
+        END ;
+
+    rr <-- verSituacao ( pp ) =
+        BEGIN rr := situacaoI ( pp )
+        END ;
+
+
+    alterarSituacao ( pp , ss ) =
+        BEGIN situacaoI ( pp ) := ss
+        END
+
+ END

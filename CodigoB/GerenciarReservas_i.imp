@@ -1,0 +1,50 @@
+/* GerenciarReservas_i
+ * Author: João Eduardo Medeiros
+ * Creation date: 07/06/16
+ */
+
+IMPLEMENTATION GerenciarReservas_i
+REFINES GerenciarReservas
+SEES
+    Pessoas, Carros
+CONCRETE_VARIABLES reservas_i
+INVARIANT reservas_i : PEOPLE --> CARS & !xx . (xx : NAT & xx <= 10 & reservas_i(xx) /= 0 => reservas_i(xx) = reservas(xx))
+INITIALISATION reservas_i := PEOPLE * {0}
+OPERATIONS
+    adicionarReserva(pp,cc) =
+        BEGIN reservas_i(pp) := cc
+        END;
+    removerReserva(pp) =
+        BEGIN reservas_i(pp) := 0
+        END;
+    qq <-- situacaoReserva(cc) = 
+        BEGIN
+            VAR ii, tmp, sair IN
+                ii := 10 ;
+                sair := 0 ;
+                qq := 0;
+                WHILE ii >= 0 & sair = 0 DO
+                    tmp := reservas_i(ii) ;
+                    IF tmp = cc THEN qq := 1; sair := 1 END;
+                    ii := ii - 1
+                INVARIANT ii : NAT & tmp : CARS & !xx . (xx : NAT & xx > ii & xx <= 10 => (reservas_i(ii) = 0 or reservas_i(ii) = 1))
+                VARIANT ii
+                END
+            END
+        END;
+
+    qq <-- cardReservas = 
+        BEGIN 
+            VAR ii, tmp IN
+                ii := 10 ;
+                qq := 0;
+                WHILE ii >= 0  DO
+                    tmp := reservas_i(ii) ;
+                    IF tmp > 0 THEN qq := qq + 1 END;
+                    ii := ii - 1
+                INVARIANT ii : NAT & tmp : CARS & qq >= 0
+                VARIANT ii
+                END
+            END
+        END
+ END
